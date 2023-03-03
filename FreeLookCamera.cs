@@ -37,20 +37,23 @@ public partial class FreeLookCamera : Camera3D
         base._Input(@event);
 
         if (Input.MouseMode == Input.MouseModeEnum.Captured)
-            if (@event is InputEventMouseMotion eve)
+        {
+            if (@event is InputEventMouseMotion mouseMotionEvent)
             {
                 Vector3 tempRot = Rotation;
-                tempRot.Y -= eve.Relative.X / 1000 * Sensitivity;
-                tempRot.X -= eve.Relative.Y / 1000 * Sensitivity;
+                tempRot.Y -= mouseMotionEvent.Relative.X / 1000 * Sensitivity;
+                tempRot.X -= mouseMotionEvent.Relative.Y / 1000 * Sensitivity;
                 tempRot.X = Mathf.Clamp(tempRot.X, Mathf.Pi / -2, Mathf.Pi / 2);
                 Rotation = tempRot;
             }
+        }
 
-        if (@event is InputEventMouseButton even)
-            switch (even.ButtonIndex)
+        if (@event is InputEventMouseButton mouseButtonEvent)
+        {
+            switch (mouseButtonEvent.ButtonIndex)
             {
                 case MouseButton.Right:
-                    Input.MouseMode = Input.MouseModeEnum.Captured;
+                    Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
                     break;
                 case MouseButton.WheelUp:
                     _velocity = Mathf.Clamp(_velocity * SpeedScale, MinSpeed, MaxSpeed);
@@ -59,6 +62,7 @@ public partial class FreeLookCamera : Camera3D
                     _velocity = Mathf.Clamp(_velocity / SpeedScale, MinSpeed, MaxSpeed);
                     break;
             }
+        }
     }
 
     public override void _Process(double delta)
@@ -73,8 +77,12 @@ public partial class FreeLookCamera : Camera3D
             .Normalized();
 
         if (Input.IsKeyPressed(Key.Shift))
+        {
             Translate(direction * (float)(_velocity * delta * BoostSpeedMultiplier));
+        }
         else
+        {
             Translate(direction * (float)(_velocity * delta));
+        }
     }
 }
